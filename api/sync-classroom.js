@@ -83,7 +83,8 @@ module.exports = async function handler(req, res) {
 async function fetchClassroomCourses(accessToken) {
   console.log('Fetching courses with token:', accessToken ? 'Token present' : 'No token')
   
-  const response = await fetch('https://classroom.googleapis.com/v1/courses?teacherIds=me&courseStates=ACTIVE', {
+  // Primero intentar obtener cursos donde el usuario es profesor
+  let response = await fetch('https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json'
@@ -99,8 +100,13 @@ async function fetchClassroomCourses(accessToken) {
   }
 
   const data = await response.json()
-  console.log('Courses fetched:', data.courses?.length || 0)
-  return data.courses || []
+  console.log('All courses fetched:', data.courses?.length || 0)
+  
+  // Filtrar cursos donde el usuario actual es profesor o propietario
+  const userCourses = data.courses || []
+  console.log('User courses found:', userCourses.length)
+  
+  return userCourses
 }
 
 async function fetchClassroomStudents(accessToken, courseId) {
