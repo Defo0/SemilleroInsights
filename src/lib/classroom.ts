@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { dataMode } from './dataMode'
 
 export interface SyncStatus {
   isLoading: boolean
@@ -9,7 +10,6 @@ export interface SyncStatus {
 export class ClassroomService {
   private static instance: ClassroomService
   private syncStatus: SyncStatus = { isLoading: false }
-
   static getInstance(): ClassroomService {
     if (!ClassroomService.instance) {
       ClassroomService.instance = new ClassroomService()
@@ -20,6 +20,12 @@ export class ClassroomService {
   async syncWithClassroom(): Promise<void> {
     try {
       this.syncStatus = { isLoading: true }
+
+      // Si estamos en modo mock, simular sincronización
+      if (dataMode.isMockMode()) {
+        await this.simulateMockSync()
+        return
+      }
 
       // Obtener el token de acceso del usuario actual
       const { data: { session } } = await supabase.auth.getSession()
@@ -60,6 +66,18 @@ export class ClassroomService {
       }
       throw error
     }
+  }
+
+  private async simulateMockSync(): Promise<void> {
+    // Simular delay de sincronización
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    this.syncStatus = {
+      isLoading: false,
+      lastSync: new Date().toISOString()
+    }
+    
+    console.log('Mock sync completed - using sample data')
   }
 
   getSyncStatus(): SyncStatus {

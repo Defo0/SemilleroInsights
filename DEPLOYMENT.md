@@ -44,20 +44,20 @@ En el dashboard de Vercel, ve a Settings > Environment Variables y agrega:
 
 ```env
 # Supabase
-VITE_SUPABASE_URL=https://yfszravrkidihnovusyz.supabase.co
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...tu-clave-anonima
 SUPABASE_SERVICE_ROLE_KEY=eyJ...tu-service-role-key
 
 # Google OAuth
-VITE_GOOGLE_CLIENT_ID=744345215051-vorsniisus3jtinkgqp4mp7oqm384dho.apps.googleusercontent.com
+VITE_GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
 
 # Notificaciones (Opcionales)
-RESEND_API_KEY=re_f2u9CuHH_JtBysPCUXZghhdxCiJYuF51K
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1421002982459314188/UAb13xRLPHD8z8OjG7PxSDQBNhWM-uL4xyNaeNRA8X4q1TYVd88JXxagwTRPHG3kD-QL
-TELEGRAM_BOT_TOKEN=8319584743:AAHEgE-ULMX6556cZNdIONieEfT7EbHrWTo
+RESEND_API_KEY=re_...tu-api-key
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+TELEGRAM_BOT_TOKEN=123456789:ABC...
 
 # App URL
-VITE_APP_URL=https://semillero-insights.vercel.app
+VITE_APP_URL=https://tu-app.vercel.app
 ```
 
 ### **Paso 4: Desplegar**

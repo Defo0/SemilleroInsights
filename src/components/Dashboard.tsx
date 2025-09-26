@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { ClassroomService } from '../lib/classroom'
-import SyncButton from './SyncButton'
+import DataModeToggle from './DataModeToggle'
 import { 
   Users, 
   BookOpen, 
   CheckCircle, 
   Clock, 
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
@@ -110,13 +111,23 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Data Mode Toggle */}
+      <DataModeToggle />
+      
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard General</h1>
           <p className="text-gray-600">Resumen del progreso académico de Semillero Digital</p>
         </div>
-        <SyncButton onSyncComplete={loadDashboardData} />
+        <button
+          onClick={loadDashboardData}
+          disabled={loading}
+          className="btn-primary flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Sincronizando...' : 'Sincronizar'}
+        </button>
       </div>
 
       {/* Métricas principales */}
