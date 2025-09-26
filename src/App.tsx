@@ -2,17 +2,18 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { Session } from '@supabase/supabase-js'
+import { UserService, UserProfile } from './lib/userService'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import ProfessorDashboard from './components/ProfessorDashboard'
+import StudentDashboard from './components/StudentDashboard'
 import NotificationSettings from './components/NotificationSettings'
 import AuthCallback from './components/AuthCallback'
 import Layout from './components/Layout'
-import { User } from './types'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Verificar si estamos en la ruta de callback
@@ -45,19 +46,23 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const loadUserProfile = async (userId: string) => {
+  const loadUserProfile = async (_userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading user profile:', error)
+      // Usar UserService para obtener o crear el perfil
+      const profile = await UserService.getCurrentUserProfile()
+      
+      // Si no existe, crear uno nuevo
+      if (!profile && session?.user) {
+        const newProfile = await UserService.createOrUpdateUser(
+          session.user.id,
+          session.user.email || '',
+          session.user.user_metadata?.full_name || session.user.email || 'Usuario',
+          session.user.user_metadata?.avatar_url
+        )
+        setUser(newProfile)
+      } else {
+        setUser(profile)
       }
-
-      setUser(data)
     } catch (error) {
       console.error('Error loading user profile:', error)
     } finally {
@@ -114,7 +119,9 @@ function App() {
           <Route 
             path="/" 
             element={
-              user.role === 'coordinator' ? <Dashboard /> : <ProfessorDashboard />
+              user.role === 'coordinator' ? <Dashboard /> : 
+              user.role === 'professor' ? <ProfessorDashboard /> : 
+              <StudentDashboard />
             } 
           />
           <Route 
@@ -132,7 +139,29 @@ function App() {
           />
           <Route 
             path="/professor" 
-            element={<ProfessorDashboard />} 
+            element={
+              user.role === 'professor' ? (
+                <ProfessorDashboard />
+              ) : (
+                <div className="card text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Acceso Denegado</h3>
+                  <p className="text-gray-600">Solo profesores pueden acceder a esta sección.</p>
+                </div>
+              )
+            } 
+          />
+          <Route 
+            path="/student" 
+            element={
+              user.role === 'student' ? (
+                <StudentDashboard />
+              ) : (
+                <div className="card text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Acceso Denegado</h3>
+                  <p className="text-gray-600">Solo estudiantes pueden acceder a esta sección.</p>
+                </div>
+              )
+            } 
           />
           <Route 
             path="/notifications" 

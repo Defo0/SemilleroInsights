@@ -1,0 +1,10 @@
+Y para que se vea que me refiero con las métricas que, que, que tiene este, este equipo de gestión y de coordinación, este es el tipo de cosas que me dieron nosotros, las las entregas totales, las entregas portaridas y entregas por cada una de las células.
+0:16
+que les decía que cada célula tiene así como 8 alumnos y cada uno de esos profesores que les decía tienen una de estas células a cargo y van haciendo el seguimiento de la de distintas tareas.
+0:31
+Entonces, Esto, este tablero que también no ahora requiere un montón de trabajo manual por parte del equipo gestión, porque van revisando dentro de clarrum cada una de las entregas y las van dividiendo entre las distintas células y necesitaríamos una forma de tener, Ya se había aplicación que generen
+0:50
+notificaciones o que tareas entregaras y tareas pendientes para los profesores y también una vista de coordinación o una vista de administrador que muestre este tipo de visualización.
+1:04
+
+para todas las células en la información para una sola para todas las células o para una sola sobre el que he estado destacado uno de los alumnos y cuantas de las tareas están corregidas, comenzadas, entregadas, etc.

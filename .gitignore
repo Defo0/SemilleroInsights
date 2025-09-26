@@ -72,5 +72,5 @@ ehthumbs.db
 *.swp
 *.swo
 *~
-video_contexto1.txt
-Video_contexto2.txt
+#video_contexto1.txt
+#Video_contexto2.txt

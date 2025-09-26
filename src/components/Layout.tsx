@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import { User } from '../types'
+import { UserProfile } from '../lib/userService'
 import { 
   BarChart3, 
   LogOut, 
@@ -16,7 +16,7 @@ import {
 interface LayoutProps {
   children: ReactNode
   session: Session
-  user: User
+  user: UserProfile
 }
 
 export default function Layout({ children, session, user }: LayoutProps) {
