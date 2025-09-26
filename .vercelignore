@@ -1,0 +1,2 @@
+# Ignore TypeScript files in production
+api/*.ts
