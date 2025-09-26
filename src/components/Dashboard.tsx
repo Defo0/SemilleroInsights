@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ClassroomService } from '../lib/classroom'
+import { DataService, type DashboardMetrics } from '../lib/dataService'
 import { dataMode } from '../lib/dataMode'
 import DataModeToggle from './DataModeToggle'
 import SyncStatus from './SyncStatus'
@@ -15,43 +15,10 @@ import {
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
-// Datos de ejemplo para el MVP
-const mockData = {
-  totalStudents: 144,
-  totalCourses: 3,
-  totalAssignments: 24,
-  completionRate: 78,
-  cells: [
-    { name: 'Célula A', students: 18, completion: 85, color: '#50c69a' },
-    { name: 'Célula B', students: 16, completion: 72, color: '#fa8534' },
-    { name: 'Célula C', students: 20, completion: 90, color: '#ed3f70' },
-    { name: 'Célula D', students: 17, completion: 68, color: '#2ec69d' },
-    { name: 'Célula E', students: 19, completion: 81, color: '#af77f4' },
-    { name: 'Célula F', students: 18, completion: 76, color: '#fe7ea1' },
-    { name: 'Célula G', students: 16, completion: 83, color: '#fcaf79' },
-    { name: 'Célula H', students: 20, completion: 79, color: '#5a25ab' },
-  ],
-  recentAssignments: [
-    { name: 'HTML Básico', submissions: 120, total: 144, dueDate: '2024-01-15' },
-    { name: 'CSS Flexbox', submissions: 98, total: 144, dueDate: '2024-01-18' },
-    { name: 'JavaScript Variables', submissions: 134, total: 144, dueDate: '2024-01-20' },
-    { name: 'Responsive Design', submissions: 87, total: 144, dueDate: '2024-01-22' },
-  ],
-  weeklyProgress: [
-    { week: 'Sem 1', entregas: 45, meta: 50 },
-    { week: 'Sem 2', entregas: 52, meta: 55 },
-    { week: 'Sem 3', entregas: 48, meta: 60 },
-    { week: 'Sem 4', entregas: 61, meta: 65 },
-  ]
-}
-
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
-  const [metrics, setMetrics] = useState<any>(null)
-  const [cellMetrics, setCellMetrics] = useState<any[]>([])
-  const [, setRecentAssignments] = useState<any[]>([])
-  const [, setWeeklyProgress] = useState<any[]>([])
-  const classroomService = ClassroomService.getInstance()
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     loadDashboardData()
@@ -78,56 +45,22 @@ export default function Dashboard() {
     try {
       setLoading(true)
       
-      // Si estamos en modo real, primero sincronizar con Classroom
-      if (dataMode.isRealMode()) {
-        try {
-          await classroomService.syncWithClassroom()
-        } catch (syncError) {
-          console.warn('Sync failed, using existing data:', syncError)
-        }
-      }
-      
-      // Cargar métricas del dashboard
-      const dashboardMetrics = await classroomService.getDashboardMetrics()
+      // Usar el nuevo DataService
+      const dashboardMetrics = await DataService.getDashboardMetrics()
       setMetrics(dashboardMetrics)
-
-      // Cargar métricas por célula
-      const cellData = await classroomService.getCellMetrics()
-      setCellMetrics(cellData)
-
-      // Cargar tareas recientes
-      const assignments = await classroomService.getRecentAssignments(8)
-      setRecentAssignments(assignments)
-
-      // Cargar progreso semanal (usando datos mock por ahora)
-      setWeeklyProgress(mockData.weeklyProgress)
 
     } catch (error) {
       console.error('Error loading dashboard data:', error)
-      // Fallback a datos mock en caso de error
-      setMetrics({
-        totalStudents: mockData.totalStudents,
-        totalCourses: mockData.totalCourses,
-        totalAssignments: mockData.totalAssignments,
-        completionRate: mockData.completionRate,
-        onTimeSubmissions: 0,
-        lateSubmissions: 0,
-        missingSubmissions: 0
-      })
-      setCellMetrics(mockData.cells.map(cell => ({
-        cellId: cell.name,
-        cellName: cell.name,
-        cellColor: cell.color,
-        studentCount: cell.students,
-        completionRate: cell.completion,
-        averageGrade: 0,
-        onTimeRate: 0
-      })))
-      setRecentAssignments(mockData.recentAssignments)
-      setWeeklyProgress(mockData.weeklyProgress)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await DataService.refreshData()
+    await loadDashboardData()
+    setRefreshing(false)
   }
 
   if (loading) {
@@ -165,12 +98,12 @@ export default function Dashboard() {
           </p>
         </div>
         <button
-          onClick={loadDashboardData}
-          disabled={loading}
+          onClick={handleRefresh}
+          disabled={loading || refreshing}
           className="btn-primary flex items-center gap-2"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Sincronizando...' : dataMode.isMockMode() ? 'Actualizar' : 'Sincronizar con Classroom'}
+          <RefreshCw className={`w-4 h-4 ${(loading || refreshing) ? 'animate-spin' : ''}`} />
+          {(loading || refreshing) ? 'Actualizando...' : 'Actualizar Dashboard'}
         </button>
       </div>
 
@@ -231,16 +164,16 @@ export default function Dashboard() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Progreso por Célula</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={cellMetrics.length > 0 ? cellMetrics : mockData.cells}>
+            <BarChart data={metrics?.cells || []}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey={cellMetrics.length > 0 ? "cellName" : "name"} />
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip 
                 formatter={(value) => [`${value}%`, 'Completitud']}
                 labelFormatter={(label) => `Célula: ${label}`}
               />
               <Bar 
-                dataKey={cellMetrics.length > 0 ? "completionRate" : "completion"} 
+                dataKey="completion" 
                 fill="#5a25ab" 
                 radius={[4, 4, 0, 0]} 
               />
@@ -252,7 +185,7 @@ export default function Dashboard() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Progreso Semanal</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mockData.weeklyProgress}>
+            <BarChart data={metrics?.weeklyProgress || []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="week" />
               <YAxis />
@@ -268,7 +201,7 @@ export default function Dashboard() {
       <div className="card">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Tareas Recientes</h3>
         <div className="space-y-4">
-          {mockData.recentAssignments.map((assignment, index) => {
+          {(metrics?.recentAssignments || []).map((assignment, index) => {
             const completionRate = Math.round((assignment.submissions / assignment.total) * 100)
             const isOverdue = new Date(assignment.dueDate) < new Date()
             
@@ -309,7 +242,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={mockData.cells}
+                  data={metrics?.cells || []}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
@@ -317,7 +250,7 @@ export default function Dashboard() {
                   dataKey="students"
                   label={({ name, students }) => `${name}: ${students}`}
                 >
-                  {mockData.cells.map((entry, index) => (
+                  {(metrics?.cells || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -326,7 +259,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
           <div className="w-full lg:w-1/2 space-y-2">
-            {mockData.cells.map((cell, index) => (
+            {(metrics?.cells || []).map((cell, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div 
                   className="w-4 h-4 rounded-full" 

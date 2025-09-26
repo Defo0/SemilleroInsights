@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { ClassroomService } from '../lib/classroom'
+import { DataService } from '../lib/dataService'
 import { 
   Users, 
   CheckCircle, 
