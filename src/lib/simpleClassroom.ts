@@ -78,8 +78,9 @@ export class SimpleClassroomService {
    */
   async detectUserRole(userEmail: string): Promise<SimpleUserRole> {
     try {
-      // Coordinadores hardcodeados
+      // Coordinadores hardcodeados - DEMO SETUP
       const coordinatorEmails = [
+        'moreno.moreno04@gmail.com',  // Coordinador principal
         'coordinador@semillerodigital.com',
         'admin@semillerodigital.com',
         'axel@semillerodigital.com'
@@ -89,7 +90,25 @@ export class SimpleClassroomService {
         return 'coordinator'
       }
 
-      // Obtener cursos donde el usuario es profesor
+      // Profesores hardcodeados - DEMO SETUP
+      const professorEmails = [
+        'semilleroinsights@gmail.com'  // Profesor demo
+      ]
+
+      if (professorEmails.includes(userEmail.toLowerCase())) {
+        return 'professor'
+      }
+
+      // Estudiantes hardcodeados - DEMO SETUP
+      const studentEmails = [
+        'basaclaudia5@gmail.com'  // Estudiante demo
+      ]
+
+      if (studentEmails.includes(userEmail.toLowerCase())) {
+        return 'student'
+      }
+
+      // Fallback: Obtener cursos donde el usuario es profesor
       const coursesData = await this.fetchFromClassroom('courses?courseStates=ACTIVE')
       const courses = coursesData.courses || []
 
