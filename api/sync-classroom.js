@@ -1,62 +1,11 @@
 const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-interface ClassroomCourse {
-  id: string
-  name: string
-  description?: string
-  enrollmentCode?: string
-  teacherProfile?: {
-    name: {
-      fullName: string
-    }
-  }
-}
-
-interface ClassroomStudent {
-  userId: string
-  profile: {
-    name: {
-      fullName: string
-    }
-    emailAddress: string
-  }
-}
-
-interface ClassroomAssignment {
-  id: string
-  title: string
-  description?: string
-  dueDate?: {
-    year: number
-    month: number
-    day: number
-  }
-  dueTime?: {
-    hours: number
-    minutes: number
-  }
-  maxPoints?: number
-}
-
-interface ClassroomSubmission {
-  id: string
-  userId: string
-  state: 'NEW' | 'CREATED' | 'TURNED_IN' | 'RETURNED' | 'RECLAIMED_BY_STUDENT'
-  assignedGrade?: number
-  submissionHistory?: Array<{
-    stateHistory: {
-      state: string
-      stateTimestamp: string
-    }
-  }>
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -131,7 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function fetchClassroomCourses(accessToken: string): Promise<ClassroomCourse[]> {
+async function fetchClassroomCourses(accessToken) {
   const response = await fetch('https://classroom.googleapis.com/v1/courses?teacherIds=me&courseStates=ACTIVE', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -147,7 +96,7 @@ async function fetchClassroomCourses(accessToken: string): Promise<ClassroomCour
   return data.courses || []
 }
 
-async function fetchClassroomStudents(accessToken: string, courseId: string): Promise<ClassroomStudent[]> {
+async function fetchClassroomStudents(accessToken, courseId) {
   const response = await fetch(`https://classroom.googleapis.com/v1/courses/${courseId}/students`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -163,7 +112,7 @@ async function fetchClassroomStudents(accessToken: string, courseId: string): Pr
   return data.students || []
 }
 
-async function fetchClassroomAssignments(accessToken: string, courseId: string): Promise<ClassroomAssignment[]> {
+async function fetchClassroomAssignments(accessToken, courseId) {
   const response = await fetch(`https://classroom.googleapis.com/v1/courses/${courseId}/courseWork`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -179,7 +128,7 @@ async function fetchClassroomAssignments(accessToken: string, courseId: string):
   return data.courseWork || []
 }
 
-async function fetchClassroomSubmissions(accessToken: string, courseId: string, assignmentId: string): Promise<ClassroomSubmission[]> {
+async function fetchClassroomSubmissions(accessToken, courseId, assignmentId) {
   const response = await fetch(`https://classroom.googleapis.com/v1/courses/${courseId}/courseWork/${assignmentId}/studentSubmissions`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -195,7 +144,7 @@ async function fetchClassroomSubmissions(accessToken: string, courseId: string, 
   return data.studentSubmissions || []
 }
 
-async function syncCourses(courses: ClassroomCourse[]) {
+async function syncCourses(courses) {
   for (const course of courses) {
     const { error } = await supabase
       .from('courses')
@@ -216,7 +165,7 @@ async function syncCourses(courses: ClassroomCourse[]) {
   }
 }
 
-async function syncStudents(students: ClassroomStudent[], courseId: string) {
+async function syncStudents(students, courseId) {
   for (const student of students) {
     const { error } = await supabase
       .from('students')
@@ -235,7 +184,7 @@ async function syncStudents(students: ClassroomStudent[], courseId: string) {
   }
 }
 
-async function syncAssignments(assignments: ClassroomAssignment[], courseId: string) {
+async function syncAssignments(assignments, courseId) {
   // Obtener el ID interno del curso
   const { data: course } = await supabase
     .from('courses')
@@ -246,7 +195,7 @@ async function syncAssignments(assignments: ClassroomAssignment[], courseId: str
   if (!course) return
 
   for (const assignment of assignments) {
-    let dueDate: string | null = null
+    let dueDate = null
     
     if (assignment.dueDate) {
       const { year, month, day } = assignment.dueDate
@@ -276,7 +225,7 @@ async function syncAssignments(assignments: ClassroomAssignment[], courseId: str
   }
 }
 
-async function syncSubmissions(submissions: ClassroomSubmission[], assignmentId: string) {
+async function syncSubmissions(submissions, assignmentId) {
   // Obtener el ID interno de la tarea
   const { data: assignment } = await supabase
     .from('assignments')
@@ -297,7 +246,7 @@ async function syncSubmissions(submissions: ClassroomSubmission[], assignmentId:
     if (!student) continue
 
     // Mapear estados de Google Classroom a nuestro esquema
-    const statusMap: Record<string, string> = {
+    const statusMap = {
       'NEW': 'new',
       'CREATED': 'new',
       'TURNED_IN': 'turned_in',
@@ -308,7 +257,7 @@ async function syncSubmissions(submissions: ClassroomSubmission[], assignmentId:
     const status = statusMap[submission.state] || 'new'
 
     // Obtener fecha de entrega del historial
-    let submittedAt: string | null = null
+    let submittedAt = null
     if (submission.submissionHistory) {
       const turnedInEntry = submission.submissionHistory.find(
         entry => entry.stateHistory.state === 'TURNED_IN'
