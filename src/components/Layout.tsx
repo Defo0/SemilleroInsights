@@ -10,8 +10,7 @@ import {
   Home, 
   Users, 
   BookOpen,
-  Bell,
-  Settings
+  Bell
 } from 'lucide-react'
 
 interface LayoutProps {

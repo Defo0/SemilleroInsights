@@ -45,8 +45,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [metrics, setMetrics] = useState<any>(null)
   const [cellMetrics, setCellMetrics] = useState<any[]>([])
-  const [recentAssignments, setRecentAssignments] = useState<any[]>([])
-  const [weeklyProgress, setWeeklyProgress] = useState<any[]>([])
+  const [, setRecentAssignments] = useState<any[]>([])
+  const [, setWeeklyProgress] = useState<any[]>([])
   const classroomService = ClassroomService.getInstance()
 
   useEffect(() => {

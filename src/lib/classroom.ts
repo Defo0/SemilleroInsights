@@ -212,8 +212,8 @@ export class ClassroomService {
 
     data?.forEach(item => {
       const cellId = item.cell_id
-      const cellName = item.cells?.name || 'Unknown'
-      const cellColor = item.cells?.color || '#5a25ab'
+      const cellName = (item.cells as any)?.name || 'Unknown'
+      const cellColor = (item.cells as any)?.color || '#5a25ab'
 
       if (!cellMetrics.has(cellId)) {
         cellMetrics.set(cellId, {
@@ -232,7 +232,7 @@ export class ClassroomService {
       const metrics = cellMetrics.get(cellId)
       metrics.studentCount++
 
-      item.students?.submissions?.forEach((submission: any) => {
+      (item.students as any)?.submissions?.forEach((submission: any) => {
         metrics.totalSubmissions++
         
         if (submission.status === 'turned_in') {

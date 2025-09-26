@@ -8,10 +8,9 @@ import {
   AlertTriangle,
   TrendingUp,
   BookOpen,
-  Bell,
-  Calendar
+  Bell
 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
 
 interface ProfessorCell {
   cellId: string
@@ -55,7 +54,7 @@ export default function ProfessorDashboard() {
   const [students, setStudents] = useState<StudentMetrics[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [weeklyProgress, setWeeklyProgress] = useState<any[]>([])
-  const classroomService = ClassroomService.getInstance()
+  const [,] = useState(() => ClassroomService.getInstance())
 
   useEffect(() => {
     loadProfessorData()
