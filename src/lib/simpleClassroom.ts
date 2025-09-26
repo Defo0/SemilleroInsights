@@ -77,6 +77,8 @@ export class SimpleClassroomService {
    * Detecta el rol del usuario basado en datos reales de Classroom
    */
   async detectUserRole(userEmail: string): Promise<SimpleUserRole> {
+    console.log(`🔍 Detectando rol para: ${userEmail}`)
+    
     try {
       // Coordinadores hardcodeados - DEMO SETUP
       const coordinatorEmails = [
@@ -87,56 +89,75 @@ export class SimpleClassroomService {
       ]
 
       if (coordinatorEmails.includes(userEmail.toLowerCase())) {
+        console.log(`✅ ${userEmail} es COORDINADOR (hardcoded)`)
         return 'coordinator'
       }
 
       // Profesores hardcodeados - DEMO SETUP
       const professorEmails = [
-        'semilleroinsights@gmail.com'  // Profesor demo
+        'semilleroinsights@gmail.com',  // Profesor demo
+        'vibeathonprofe@gmail.com'      // Profesor específico solicitado
       ]
 
       if (professorEmails.includes(userEmail.toLowerCase())) {
+        console.log(`✅ ${userEmail} es PROFESOR (hardcoded)`)
         return 'professor'
       }
 
-      // Estudiantes hardcodeados - DEMO SETUP
-      const studentEmails = [
-        'basaclaudia5@gmail.com'  // Estudiante demo
-      ]
-
-      if (studentEmails.includes(userEmail.toLowerCase())) {
-        return 'student'
-      }
-
-      // Fallback: Obtener cursos donde el usuario es profesor
-      const coursesData = await this.fetchFromClassroom('courses?courseStates=ACTIVE')
-      const courses = coursesData.courses || []
-
       // Verificar si es profesor en algún curso
+      const courses = await this.getCourses()
+      console.log(`📚 Verificando ${courses.length} cursos para detectar rol de ${userEmail}`)
+      
       for (const course of courses) {
         try {
+          console.log(`🔍 Verificando curso: ${course.name} (${course.id})`)
           const teachersData = await this.fetchFromClassroom(`courses/${course.id}/teachers`)
           const teachers = teachersData.teachers || []
           
-          if (teachers.some((t: any) => t.profile?.emailAddress === userEmail)) {
+          console.log(`👨‍🏫 Profesores en ${course.name}:`, teachers.map((t: any) => t.profile?.emailAddress))
+          
+          if (teachers.some((t: any) => t.profile?.emailAddress?.toLowerCase() === userEmail.toLowerCase())) {
+            console.log(`✅ ${userEmail} es PROFESOR en curso: ${course.name}`)
             return 'professor'
           }
         } catch (error) {
-          // Si no puede acceder a teachers, continúa
+          console.log(`⚠️ Error verificando profesores en curso ${course.name}:`, error)
           continue
         }
       }
-
-      // Por defecto es estudiante
+      
+      // Verificar si es estudiante en algún curso
+      for (const course of courses) {
+        try {
+          const studentsData = await this.fetchFromClassroom(`courses/${course.id}/students`)
+          const students = studentsData.students || []
+          
+          console.log(`👥 Estudiantes en ${course.name}:`, students.map((s: any) => s.profile?.emailAddress))
+          
+          if (students.some((s: any) => s.profile?.emailAddress?.toLowerCase() === userEmail.toLowerCase())) {
+            console.log(`✅ ${userEmail} es ESTUDIANTE en curso: ${course.name}`)
+            return 'student'
+          }
+        } catch (error) {
+          console.log(`⚠️ Error verificando estudiantes en curso ${course.name}:`, error)
+          continue
+        }
+      }
+      
+      // Si no se encuentra en ningún curso, asumir estudiante
+      console.log(`⚠️ ${userEmail} no encontrado en ningún curso, asumiendo ESTUDIANTE`)
       return 'student'
+      
     } catch (error) {
-      console.error('Error detecting user role:', error)
-      return 'student' // Fallback
+      console.error('❌ Error detectando rol:', error)
+      // Fallback: asumir estudiante
+      return 'student'
     }
   }
 
   /**
    * Obtiene todos los cursos accesibles
+{{ ... }}
    */
   async getCourses(): Promise<SimpleCourse[]> {
     try {
@@ -299,17 +320,22 @@ export class SimpleClassroomService {
     
     try {
       const allCourses = await this.getCourses()
-      console.log(`📚 Revisando ${allCourses.length} cursos para encontrar los del profesor`)
+      console.log(`📚 Encontrados ${allCourses.length} cursos totales:`, allCourses.map(c => c.name))
       
       const professorCourses = []
 
       // Filtrar cursos donde es profesor
       for (const course of allCourses) {
         try {
-          console.log(`🔍 Verificando si ${professorEmail} es profesor en: ${course.name}`)
+          console.log(`🔍 Verificando si ${professorEmail} es profesor en: ${course.name} (ID: ${course.id})`)
           
           const teachersData = await this.fetchFromClassroom(`courses/${course.id}/teachers`)
           const teachers = teachersData.teachers || []
+          
+          console.log(`👨‍🏫 Profesores encontrados en ${course.name}:`, teachers.map((t: any) => ({
+            email: t.profile?.emailAddress,
+            name: t.profile?.name?.fullName
+          })))
           
           const isTeacher = teachers.some((t: any) => 
             t.profile?.emailAddress?.toLowerCase() === professorEmail.toLowerCase()
@@ -320,11 +346,19 @@ export class SimpleClassroomService {
             
             // Obtener estudiantes del curso
             const students = await this.getStudentsInCourse(course.id)
-            console.log(`👥 ${students.length} estudiantes en ${course.name}`)
+            console.log(`👥 ${students.length} estudiantes en ${course.name}:`, students.map(s => s.profile?.name?.fullName))
             
             // Obtener tareas del curso
             const assignments = await this.getAssignmentsInCourse(course.id)
-            console.log(`📝 ${assignments.length} tareas en ${course.name}`)
+            console.log(`📝 ${assignments.length} tareas en ${course.name}:`, assignments.map(a => a.title))
+            
+            // Si no hay estudiantes o tareas, aún mostrar el curso
+            if (students.length === 0) {
+              console.log(`⚠️ No hay estudiantes en ${course.name}`)
+            }
+            if (assignments.length === 0) {
+              console.log(`⚠️ No hay tareas en ${course.name}`)
+            }
             
             // Calcular métricas por estudiante
             const studentsWithMetrics = []
@@ -334,16 +368,28 @@ export class SimpleClassroomService {
               let averageGrade = 0
               let gradeCount = 0
               
+              console.log(`📊 Calculando métricas para estudiante: ${student.profile?.name?.fullName}`)
+              
               for (const assignment of assignments) {
-                const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
-                const studentSubmission = submissions.find(s => s.studentId === student.userId)
-                
-                if (studentSubmission && studentSubmission.state === 'TURNED_IN') {
-                  completedTasks++
-                  if (studentSubmission.assignedGrade) {
-                    averageGrade += studentSubmission.assignedGrade
-                    gradeCount++
+                try {
+                  const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
+                  const studentSubmission = submissions.find(s => s.studentId === student.userId)
+                  
+                  if (studentSubmission) {
+                    console.log(`📋 Entrega encontrada para ${student.profile?.name?.fullName} en ${assignment.title}: ${studentSubmission.state}`)
+                    
+                    if (studentSubmission.state === 'TURNED_IN') {
+                      completedTasks++
+                      if (studentSubmission.assignedGrade) {
+                        averageGrade += studentSubmission.assignedGrade
+                        gradeCount++
+                      }
+                    }
+                  } else {
+                    console.log(`❌ No hay entrega de ${student.profile?.name?.fullName} para ${assignment.title}`)
                   }
+                } catch (submissionError) {
+                  console.log(`⚠️ Error obteniendo entregas para ${assignment.title}:`, submissionError)
                 }
               }
               
@@ -360,17 +406,31 @@ export class SimpleClassroomService {
             // Calcular métricas por tarea
             const assignmentsWithMetrics = []
             for (const assignment of assignments) {
-              const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
-              const submittedCount = submissions.filter(s => s.state === 'TURNED_IN').length
-              const pendingCount = students.length - submittedCount
-              const lateCount = submissions.filter(s => s.late).length
-              
-              assignmentsWithMetrics.push({
-                ...assignment,
-                submissions: submittedCount,
-                pending: pendingCount,
-                late: lateCount
-              })
+              try {
+                const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
+                const submittedCount = submissions.filter(s => s.state === 'TURNED_IN').length
+                const pendingCount = students.length - submittedCount
+                const lateCount = submissions.filter(s => s.late).length
+                
+                console.log(`📝 Métricas para ${assignment.title}: ${submittedCount} entregadas, ${pendingCount} pendientes, ${lateCount} tardías`)
+                
+                assignmentsWithMetrics.push({
+                  ...assignment,
+                  submissions: submittedCount,
+                  pending: pendingCount,
+                  late: lateCount,
+                  dueDate: assignment.dueDate ? JSON.stringify(assignment.dueDate) : 'Sin fecha'
+                })
+              } catch (assignmentError) {
+                console.log(`⚠️ Error obteniendo métricas para ${assignment.title}:`, assignmentError)
+                assignmentsWithMetrics.push({
+                  ...assignment,
+                  submissions: 0,
+                  pending: students.length,
+                  late: 0,
+                  dueDate: 'Sin fecha'
+                })
+              }
             }
             
             professorCourses.push({
@@ -387,7 +447,7 @@ export class SimpleClassroomService {
             console.log(`❌ ${professorEmail} NO es profesor en: ${course.name}`)
           }
         } catch (error) {
-          console.error(`Error verificando curso ${course.name}:`, error)
+          console.error(`❌ Error verificando curso ${course.name}:`, error)
           continue
         }
       }
@@ -399,7 +459,13 @@ export class SimpleClassroomService {
         recentActivity: [] // Se calculará en tiempo real después
       }
 
-      console.log(`✅ Datos de profesor obtenidos: ${professorCourses.length} cursos`, result)
+      console.log(`✅ RESULTADO FINAL - Datos de profesor obtenidos: ${professorCourses.length} cursos`, result)
+      
+      if (professorCourses.length === 0) {
+        console.log(`⚠️ ATENCIÓN: No se encontraron cursos para el profesor ${professorEmail}`)
+        console.log(`📋 Cursos disponibles:`, allCourses.map(c => c.name))
+      }
+      
       return result
 
     } catch (error) {
