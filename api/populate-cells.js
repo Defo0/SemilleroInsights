@@ -20,14 +20,25 @@ module.exports = async function handler(req, res) {
       { name: 'Célula C - Data Analytics', color: '#ed3f70', description: 'Especialización en análisis de datos y business intelligence' }
     ]
 
-    // Insertar células
-    const { data: cells, error: cellsError } = await supabase
+    // Verificar si las células ya existen
+    const { data: existingCells } = await supabase
       .from('cells')
-      .upsert(cellsData, { onConflict: 'name' })
-      .select()
+      .select('*')
 
-    if (cellsError) {
-      throw new Error(`Error creating cells: ${cellsError.message}`)
+    let cells = existingCells || []
+
+    // Solo insertar células que no existen
+    if (cells.length === 0) {
+      const { data: newCells, error: cellsError } = await supabase
+        .from('cells')
+        .insert(cellsData)
+        .select()
+
+      if (cellsError) {
+        throw new Error(`Error creating cells: ${cellsError.message}`)
+      }
+      
+      cells = newCells || []
     }
 
     console.log(`Created/updated ${cells?.length || 0} cells`)
@@ -66,13 +77,33 @@ module.exports = async function handler(req, res) {
     }
 
     // 4. Insertar asignaciones (evitar duplicados)
-    const { data: insertedAssignments, error: assignmentError } = await supabase
-      .from('student_cells')
-      .upsert(assignments, { onConflict: 'student_id,cell_id' })
-      .select()
+    let insertedAssignments = []
+    
+    if (assignments.length > 0) {
+      // Verificar asignaciones existentes
+      const { data: existingAssignments } = await supabase
+        .from('student_cells')
+        .select('student_id, cell_id')
 
-    if (assignmentError) {
-      throw new Error(`Error assigning students to cells: ${assignmentError.message}`)
+      // Filtrar solo asignaciones nuevas
+      const newAssignments = assignments.filter(assignment => 
+        !existingAssignments?.some(existing => 
+          existing.student_id === assignment.student_id && existing.cell_id === assignment.cell_id
+        )
+      )
+
+      if (newAssignments.length > 0) {
+        const { data: newInsertedAssignments, error: assignmentError } = await supabase
+          .from('student_cells')
+          .insert(newAssignments)
+          .select()
+
+        if (assignmentError) {
+          throw new Error(`Error assigning students to cells: ${assignmentError.message}`)
+        }
+        
+        insertedAssignments = newInsertedAssignments || []
+      }
     }
 
     // 5. Crear profesores de ejemplo si no existen
@@ -82,13 +113,25 @@ module.exports = async function handler(req, res) {
       { name: 'Prof. Ana Martínez', email: 'profesor3.semillero@gmail.com', role: 'professor' }
     ]
 
-    const { data: professors, error: professorsError } = await supabase
+    // Verificar si los profesores ya existen
+    const { data: existingProfessors } = await supabase
       .from('professors')
-      .upsert(professorsData, { onConflict: 'email' })
-      .select()
+      .select('*')
 
-    if (professorsError) {
-      console.warn('Error creating professors:', professorsError.message)
+    let professors = existingProfessors || []
+
+    // Solo crear profesores si no existen
+    if (professors.length === 0) {
+      const { data: newProfessors, error: professorsError } = await supabase
+        .from('professors')
+        .insert(professorsData)
+        .select()
+
+      if (professorsError) {
+        console.warn('Error creating professors:', professorsError.message)
+      } else {
+        professors = newProfessors || []
+      }
     }
 
     // 6. Asignar profesores a las primeras 3 células
@@ -103,9 +146,23 @@ module.exports = async function handler(req, res) {
         })
       }
 
-      await supabase
+      // Verificar asignaciones existentes de profesores
+      const { data: existingProfAssignments } = await supabase
         .from('professor_cells')
-        .upsert(professorAssignments, { onConflict: 'professor_id,cell_id' })
+        .select('professor_id, cell_id')
+
+      // Filtrar solo asignaciones nuevas
+      const newProfAssignments = professorAssignments.filter(assignment => 
+        !existingProfAssignments?.some(existing => 
+          existing.professor_id === assignment.professor_id && existing.cell_id === assignment.cell_id
+        )
+      )
+
+      if (newProfAssignments.length > 0) {
+        await supabase
+          .from('professor_cells')
+          .insert(newProfAssignments)
+      }
     }
 
     // 7. Obtener estadísticas finales
