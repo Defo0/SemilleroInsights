@@ -6,6 +6,7 @@ import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import ProfessorDashboard from './components/ProfessorDashboard'
 import NotificationSettings from './components/NotificationSettings'
+import AuthCallback from './components/AuthCallback'
 import Layout from './components/Layout'
 import { User } from './types'
 
@@ -13,6 +14,9 @@ function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Verificar si estamos en la ruta de callback
+  const isCallbackRoute = window.location.pathname === '/auth/callback'
 
   useEffect(() => {
     // Obtener sesión inicial
@@ -59,6 +63,11 @@ function App() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Si estamos en la ruta de callback, mostrar el componente de callback
+  if (isCallbackRoute) {
+    return <AuthCallback />
   }
 
   if (loading) {

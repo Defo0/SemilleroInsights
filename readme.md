@@ -7,7 +7,7 @@
   
   **Transformando la educación digital con tecnología de vanguardia**
   
-  [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://semilleroinsights.vercel.app)
+  [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://semillero-insights.vercel.app)
   [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
   [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
@@ -291,10 +291,10 @@ TELEGRAM_BOT_TOKEN=tu_token_del_bot
 
 <div align="center">
 
-[![Website](https://img.shields.io/badge/Website-semilleroinsights.vercel.app-5a25ab?style=for-the-badge)](https://semilleroinsights.vercel.app)
-[![Email](https://img.shields.io/badge/Email-contact@semilleroinsights.com-fabb2f?style=for-the-badge)](mailto:semilleroinsights@gmail.com)
+[![Website](https://img.shields.io/badge/Website-semillero--insights.vercel.app-5a25ab?style=for-the-badge)](https://semillero-insights.vercel.app)
+[![Email](https://img.shields.io/badge/Email-semilleroinsights@gmail.com-fabb2f?style=for-the-badge)](mailto:semilleroinsights@gmail.com)
 [![Discord](https://img.shields.io/badge/Discord-Semillero%20Community-7289da?style=for-the-badge&logo=discord)](https://discord.gg/sQPNuzvaSF)
-[![Telegram](https://img.shields.io/badge/Telegram-@SemilleroInsights-26a5e4?style=for-the-badge&logo=telegram)](https://t.me/SemilleroInsights)
+[![Telegram](https://img.shields.io/badge/Telegram-@SemilleroBot-26a5e4?style=for-the-badge&logo=telegram)](https://t.me/SemilleroBot)
 
 </div>
 
