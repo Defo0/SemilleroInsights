@@ -70,8 +70,7 @@ module.exports = async function handler(req, res) {
       if (targetCell) {
         assignments.push({
           student_id: unassignedStudents[i].id,
-          cell_id: targetCell.id,
-          assigned_at: new Date().toISOString()
+          cell_id: targetCell.id
         })
       }
     }
@@ -141,8 +140,7 @@ module.exports = async function handler(req, res) {
       for (let i = 0; i < Math.min(professors.length, 3); i++) {
         professorAssignments.push({
           professor_id: professors[i].id,
-          cell_id: cells[i].id,
-          assigned_at: new Date().toISOString()
+          cell_id: cells[i].id
         })
       }
 
