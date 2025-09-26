@@ -31,10 +31,11 @@
 
 Una **capa inteligente** sobre Google Classroom que automatiza, visualiza y optimiza la gestión educativa con:
 
-- **🤖 Sincronización Automática** con Google Classroom API
-- **📈 Dashboards Personalizados** por rol (Coordinador/Profesor)
+- **🤖 Integración 100% Real** con Google Classroom API
+- **📈 Dashboards Personalizados** por rol (Coordinador/Profesor/Estudiante)
 - **🎯 Sistema de Células** para seguimiento granular
 - **🔔 Notificaciones Multi-canal** (Email, Discord, Telegram)
+- **👤 Detección Automática de Roles** basada en permisos de Google Classroom
 
 ---
 
@@ -66,30 +67,38 @@ graph TB
 
 | Categoría | Tecnología | Propósito |
 |-----------|------------|-----------|
-| **Frontend** | React 18 + TypeScript | Interfaz de usuario moderna y tipada |
+| **Frontend** | React 18 + TypeScript + Vite | Interfaz de usuario moderna y tipada |
 | **Styling** | TailwindCSS + Raleway Font | Diseño responsive basado en Semillero Digital |
 | **Backend** | Supabase (PostgreSQL) | Base de datos y autenticación |
-| **API** | Google Classroom API | Sincronización de datos educativos |
+| **API** | Google Classroom API (100% Real) | Sincronización directa con Google Classroom |
 | **Serverless** | Vercel Functions | Lógica de negocio escalable |
 | **Notificaciones** | Resend + Discord + Telegram | Sistema multi-canal |
 | **Visualización** | Recharts | Gráficos interactivos |
-| **Despliegue** | Vercel | Hosting y CI/CD |
+| **Despliegue** | Vercel | Hosting y CI/CD automático |
 
 ---
 
 ## ✨ **Características Principales**
 
 ### 🎛️ **Dashboard del Coordinador**
-- **📊 Métricas Globales**: Vista completa de 144 estudiantes distribuidos en 8 células
-- **📈 Análisis Visual**: Gráficos de progreso, completitud y rendimiento
-- **🔄 Sincronización**: Botón de sincronización con Google Classroom en tiempo real
+- **📊 Métricas Globales**: Vista completa de todos los cursos y estudiantes
+- **📈 Análisis Visual**: Gráficos de progreso, completitud y rendimiento en tiempo real
+- **🔄 Sincronización Automática**: Datos actualizados directamente desde Google Classroom
 - **📋 Gestión Centralizada**: Control total sobre cursos, tareas y estudiantes
+- **🎯 Detección de Riesgos**: Identificación automática de estudiantes en riesgo
 
 ### 👨‍🏫 **Dashboard del Profesor**
-- **🎯 Vista Filtrada**: Solo estudiantes de células asignadas
+- **🎯 Vista Personalizada**: Cursos donde el usuario es profesor según Google Classroom
 - **📱 Alertas Inteligentes**: Notificaciones de entregas y fechas límite
-- **📊 Métricas Personalizadas**: Progreso específico por célula
-- **👥 Seguimiento Individual**: Estado detallado de cada estudiante
+- **📊 Métricas en Tiempo Real**: Progreso específico de sus cursos
+- **👥 Seguimiento Individual**: Estado detallado de cada estudiante asignado
+- **🔔 Notificaciones Multi-canal**: Email, Discord y Telegram configurables
+
+### 👨‍🎓 **Dashboard del Estudiante**
+- **📚 Vista Personal**: Cursos donde el usuario está inscrito
+- **📝 Tareas Pendientes**: Lista de asignaciones por completar
+- **📊 Progreso Individual**: Métricas personales de rendimiento
+- **🎯 Metas y Logros**: Sistema de seguimiento de objetivos
 
 ### 🔔 **Sistema de Notificaciones Avanzado**
 - **📧 Email**: Notificaciones HTML elegantes con Resend

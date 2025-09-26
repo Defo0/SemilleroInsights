@@ -17,13 +17,16 @@
 **Semillero Insights**: Una capa inteligente sobre Google Classroom que:
 
 ### 🚀 **Automatiza**
-- Sincronización en tiempo real con Classroom API
+- Integración 100% real con Classroom API
+- Detección automática de roles (Coordinador/Profesor/Estudiante)
 - Consolidación automática de métricas
 - **Resultado**: De 4 horas a 15 minutos semanales
 
-### 🎯 **Segmenta**
-- Sistema de "células" de 8 estudiantes
-- Dashboards personalizados por rol
+### 🎯 **Personaliza**
+- Dashboards específicos por rol detectado automáticamente
+- Vista de coordinador: métricas globales
+- Vista de profesor: solo sus cursos asignados
+- Vista de estudiante: progreso personal
 - **Resultado**: Seguimiento granular y personalizado
 
 ### 🔔 **Comunica**
@@ -36,10 +39,11 @@
 ## 🏗️ **Tecnología (30 segundos)**
 
 **Stack Moderno y Escalable**:
-- **Frontend**: React + TypeScript + TailwindCSS
-- **Backend**: Supabase + Vercel Serverless
-- **APIs**: Google Classroom + Resend + Discord + Telegram
+- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS
+- **Backend**: Supabase + Vercel Serverless Functions
+- **APIs**: Google Classroom API (100% Real) + Resend + Discord + Telegram
 - **Diseño**: Basado en identidad visual de Semillero Digital
+- **Servicio**: Refactorizado para máxima simplicidad y mantenibilidad
 
 **Arquitectura Serverless**: Cero mantenimiento, escalabilidad automática, costos mínimos.
 
@@ -74,10 +78,18 @@
 
 ### 👨‍🏫 **Dashboard del Profesor**
 *[Mostrar pantalla]*
-- Vista filtrada por célula asignada
+- Detección automática: vibeathonprofe@gmail.com reconocido como profesor
+- Vista filtrada de cursos donde es profesor según Google Classroom
 - Alertas de entregas recientes
 - Seguimiento individual de estudiantes
 - Estados detallados por alumno
+
+### 👨‍🎓 **Dashboard del Estudiante**
+*[Mostrar pantalla]*
+- Vista personal de cursos inscritos
+- Progreso individual de tareas
+- Próximas fechas de entrega
+- Historial de entregas
 
 ### 🔔 **Sistema de Notificaciones**
 *[Mostrar pantalla]*
@@ -170,8 +182,10 @@ Transformamos la educación digital para los más vulnerables, democratizando el
 
 ### 🎯 **Innovación Técnica**
 - Arquitectura serverless moderna
-- Integración completa con Google Classroom API
+- Integración 100% real con Google Classroom API
+- Detección automática de roles basada en permisos de Google
 - Sistema de notificaciones multi-canal
+- Servicio refactorizado para máxima simplicidad
 - Diseño responsive y accesible
 
 ### 💼 **Viabilidad de Negocio**
