@@ -1,5 +1,6 @@
 // Servicio simple que usa SOLO la API de Google Classroom
 // Sin base de datos, sin complicaciones
+import { mockCoordinatorData, mockProfessorData, mockStudentData } from './mockData'
 
 export type SimpleUserRole = 'coordinator' | 'professor' | 'student'
 
@@ -211,162 +212,30 @@ export class SimpleClassroomService {
   }
 
   /**
-   * Vista para COORDINADOR: Métricas globales
+   * Vista para COORDINADOR: Métricas globales (DATOS MOCKEADOS)
    */
   async getCoordinatorData(): Promise<any> {
-    try {
-      const courses = await this.getCourses()
-      let totalStudents = 0
-      let totalAssignments = 0
-      let totalSubmissions = 0
-      let completedSubmissions = 0
-      let lateSubmissions = 0
-
-      for (const course of courses) {
-        // Contar estudiantes
-        const students = await this.getStudentsInCourse(course.id)
-        totalStudents += students.length
-
-        // Contar tareas y entregas
-        const assignments = await this.getAssignmentsInCourse(course.id)
-        totalAssignments += assignments.length
-
-        for (const assignment of assignments) {
-          const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
-          totalSubmissions += submissions.length
-          completedSubmissions += submissions.filter(s => s.state === 'TURNED_IN').length
-          lateSubmissions += submissions.filter(s => s.late).length
-        }
-      }
-
-      return {
-        totalCourses: courses.length,
-        totalStudents,
-        totalAssignments,
-        totalSubmissions,
-        completedSubmissions,
-        lateSubmissions,
-        completionRate: totalSubmissions > 0 ? Math.round((completedSubmissions / totalSubmissions) * 100) : 0,
-        courses
-      }
-    } catch (error) {
-      console.error('Error getting coordinator data:', error)
-      return {
-        totalCourses: 0,
-        totalStudents: 0,
-        totalAssignments: 0,
-        totalSubmissions: 0,
-        completedSubmissions: 0,
-        lateSubmissions: 0,
-        completionRate: 0,
-        courses: []
-      }
-    }
+    // Simular delay de API
+    await new Promise(resolve => setTimeout(resolve, 500))
+    return mockCoordinatorData
   }
 
   /**
-   * Vista para PROFESOR: Sus cursos y estudiantes
+   * Vista para PROFESOR: Sus cursos y estudiantes (DATOS MOCKEADOS)
    */
-  async getProfessorData(professorEmail: string): Promise<any> {
-    try {
-      const allCourses = await this.getCourses()
-      const professorCourses = []
-
-      // Filtrar cursos donde es profesor
-      for (const course of allCourses) {
-        try {
-          const teachersData = await this.fetchFromClassroom(`courses/${course.id}/teachers`)
-          const teachers = teachersData.teachers || []
-          
-          if (teachers.some((t: any) => t.profile?.emailAddress === professorEmail)) {
-            const students = await this.getStudentsInCourse(course.id)
-            const assignments = await this.getAssignmentsInCourse(course.id)
-            
-            professorCourses.push({
-              ...course,
-              students,
-              assignments,
-              studentCount: students.length,
-              assignmentCount: assignments.length
-            })
-          }
-        } catch (error) {
-          continue
-        }
-      }
-
-      return {
-        courses: professorCourses,
-        totalStudents: professorCourses.reduce((sum, course) => sum + course.studentCount, 0),
-        totalAssignments: professorCourses.reduce((sum, course) => sum + course.assignmentCount, 0)
-      }
-    } catch (error) {
-      console.error('Error getting professor data:', error)
-      return {
-        courses: [],
-        totalStudents: 0,
-        totalAssignments: 0
-      }
-    }
+  async getProfessorData(_professorEmail: string): Promise<any> {
+    // Simular delay de API
+    await new Promise(resolve => setTimeout(resolve, 800))
+    return mockProfessorData
   }
 
   /**
-   * Vista para ESTUDIANTE: Su progreso personal
+   * Vista para ESTUDIANTE: Su progreso personal (DATOS MOCKEADOS)
    */
-  async getStudentData(studentEmail: string): Promise<any> {
-    try {
-      const courses = await this.getCourses()
-      const studentCourses = []
-      let totalAssignments = 0
-      let completedAssignments = 0
-      let lateSubmissions = 0
-
-      for (const course of courses) {
-        const students = await this.getStudentsInCourse(course.id)
-        const studentInCourse = students.find((s: any) => s.profile?.emailAddress === studentEmail)
-        
-        if (studentInCourse) {
-          const assignments = await this.getAssignmentsInCourse(course.id)
-          totalAssignments += assignments.length
-
-          for (const assignment of assignments) {
-            const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
-            const studentSubmission = submissions.find(s => s.studentId === studentInCourse.userId)
-            
-            if (studentSubmission) {
-              if (studentSubmission.state === 'TURNED_IN') {
-                completedAssignments++
-              }
-              if (studentSubmission.late) {
-                lateSubmissions++
-              }
-            }
-          }
-
-          studentCourses.push({
-            ...course,
-            assignments
-          })
-        }
-      }
-
-      return {
-        courses: studentCourses,
-        totalAssignments,
-        completedAssignments,
-        lateSubmissions,
-        completionRate: totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0
-      }
-    } catch (error) {
-      console.error('Error getting student data:', error)
-      return {
-        courses: [],
-        totalAssignments: 0,
-        completedAssignments: 0,
-        lateSubmissions: 0,
-        completionRate: 0
-      }
-    }
+  async getStudentData(_studentEmail: string): Promise<any> {
+    // Simular delay de API
+    await new Promise(resolve => setTimeout(resolve, 600))
+    return mockStudentData
   }
 
   // Helpers
