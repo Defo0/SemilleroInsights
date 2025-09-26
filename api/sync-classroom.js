@@ -81,6 +81,8 @@ module.exports = async function handler(req, res) {
 }
 
 async function fetchClassroomCourses(accessToken) {
+  console.log('Fetching courses with token:', accessToken ? 'Token present' : 'No token')
+  
   const response = await fetch('https://classroom.googleapis.com/v1/courses?teacherIds=me&courseStates=ACTIVE', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -88,11 +90,16 @@ async function fetchClassroomCourses(accessToken) {
     }
   })
 
+  console.log('Classroom API response status:', response.status)
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch courses: ${response.statusText}`)
+    const errorText = await response.text()
+    console.error('Classroom API error:', errorText)
+    throw new Error(`Failed to fetch courses: ${response.status} ${response.statusText} - ${errorText}`)
   }
 
   const data = await response.json()
+  console.log('Courses fetched:', data.courses?.length || 0)
   return data.courses || []
 }
 
