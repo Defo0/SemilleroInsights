@@ -56,7 +56,7 @@ credentials.json
 *.temp
 .cache
 .parcel-cache
-
+cosas.txt
 # OS generated files
 Thumbs.db
 .DS_Store

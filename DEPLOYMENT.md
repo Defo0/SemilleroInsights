@@ -3,12 +3,12 @@
 ## 📋 Checklist Pre-Despliegue
 
 ### ✅ **1. Configuración de Supabase**
-- [ ] Proyecto creado en [supabase.com](https://supabase.com)
-- [ ] Ejecutar `supabase-schema.sql` en SQL Editor
-- [ ] Ejecutar `notifications-schema.sql` en SQL Editor
-- [ ] Ejecutar `sample-data.sql` para datos de prueba
-- [ ] Configurar Google OAuth en Authentication > Settings
-- [ ] Anotar URL del proyecto y claves
+- [r ] Proyecto creado en [supabase.com](https://supabase.com)
+- [r ] Ejecutar `supabase-schema.sql` en SQL Editor
+- [r ] Ejecutar `notifications-schema.sql` en SQL Editor
+- [r ] Ejecutar `sample-data.sql` para datos de prueba
+- [r ] Configurar Google OAuth en Authentication > Settings
+- [r ] Anotar URL del proyecto y claves 
 
 ### ✅ **2. Configuración de Google Cloud Console**
 - [ ] Proyecto creado en [console.cloud.google.com](https://console.cloud.google.com)
