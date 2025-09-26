@@ -11,7 +11,6 @@ function SimpleApp() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any>(null)
   const [demoRole, setDemoRole] = useState<SimpleUserRole | null>(null) // Para selector de demo
-  const [useRealData, setUseRealData] = useState(false) // Toggle para datos reales vs mock
 
   const classroomService = SimpleClassroomService.getInstance()
 
@@ -87,8 +86,7 @@ function SimpleApp() {
 
   const loadDataForRole = async (role: SimpleUserRole, email: string) => {
     try {
-      // Configurar el servicio para usar datos reales o mock
-      classroomService.setUseRealData(useRealData)
+      console.log(`🔄 Cargando datos para rol: ${role}, email: ${email}`)
       
       let roleData
 
@@ -107,8 +105,9 @@ function SimpleApp() {
       }
 
       setData(roleData)
+      console.log('✅ Datos cargados exitosamente:', roleData)
     } catch (error) {
-      console.error('Error loading role data:', error)
+      console.error('❌ Error loading role data:', error)
       setData(null)
     }
   }
@@ -131,15 +130,6 @@ function SimpleApp() {
     }
   }
 
-  const handleDataModeToggle = async () => {
-    if (user) {
-      setUseRealData(!useRealData)
-      setLoading(true)
-      const currentRole = demoRole || user.role
-      await loadDataForRole(currentRole, user.email)
-      setLoading(false)
-    }
-  }
 
   // Si estamos en la ruta de callback, mostrar el componente de callback
   if (isCallbackRoute) {
@@ -199,20 +189,11 @@ function SimpleApp() {
                 
                 {/* Controles Demo */}
                 <div className="flex items-center gap-4">
-                  {/* Toggle Datos Reales/Mock */}
+                  {/* Indicador API Real */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Datos:</span>
-                    <button
-                      onClick={handleDataModeToggle}
-                      disabled={loading}
-                      className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${
-                        useRealData 
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {loading ? '⏳' : useRealData ? '🔗 API Real' : '🎭 Mock'}
-                    </button>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                      🔗 Google Classroom API
+                    </span>
                   </div>
                   
                   {/* Selector de Vista Demo */}

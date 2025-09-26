@@ -1,6 +1,5 @@
 // Servicio simple que usa SOLO la API de Google Classroom
 // Sin base de datos, sin complicaciones
-import { mockCoordinatorData, mockProfessorData, mockStudentData } from './mockData'
 
 export type SimpleUserRole = 'coordinator' | 'professor' | 'student'
 
@@ -43,7 +42,6 @@ export interface SimpleSubmission {
 export class SimpleClassroomService {
   private static instance: SimpleClassroomService
   private accessToken: string | null = null
-  private useRealData: boolean = false
 
   static getInstance(): SimpleClassroomService {
     if (!SimpleClassroomService.instance) {
@@ -54,10 +52,6 @@ export class SimpleClassroomService {
 
   setAccessToken(token: string) {
     this.accessToken = token
-  }
-
-  setUseRealData(useReal: boolean) {
-    this.useRealData = useReal
   }
 
   private async fetchFromClassroom(endpoint: string) {
@@ -217,43 +211,62 @@ export class SimpleClassroomService {
   }
 
   /**
-   * Vista para COORDINADOR: Métricas globales (REAL O MOCK)
+   * Vista para COORDINADOR: Métricas globales (SOLO API REAL)
    */
   async getCoordinatorData(): Promise<any> {
-    // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 500))
+    console.log('🔍 Obteniendo datos de coordinador desde Google Classroom API...')
     
-    if (!this.useRealData) {
-      return mockCoordinatorData
-    }
-
-    // DATOS REALES de Google Classroom API
     try {
       const courses = await this.getCourses()
+      console.log(`📚 Encontrados ${courses.length} cursos`)
+      
       let totalStudents = 0
       let totalAssignments = 0
       let totalSubmissions = 0
       let completedSubmissions = 0
       let lateSubmissions = 0
+      const coursesWithDetails = []
 
       for (const course of courses) {
+        console.log(`📖 Procesando curso: ${course.name}`)
+        
         // Contar estudiantes
         const students = await this.getStudentsInCourse(course.id)
         totalStudents += students.length
+        console.log(`👥 ${students.length} estudiantes en ${course.name}`)
 
         // Contar tareas y entregas
         const assignments = await this.getAssignmentsInCourse(course.id)
         totalAssignments += assignments.length
+        console.log(`📝 ${assignments.length} tareas en ${course.name}`)
+
+        let courseSubmissions = 0
+        let courseCompleted = 0
+        let courseLate = 0
 
         for (const assignment of assignments) {
           const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
-          totalSubmissions += submissions.length
-          completedSubmissions += submissions.filter(s => s.state === 'TURNED_IN').length
-          lateSubmissions += submissions.filter(s => s.late).length
+          courseSubmissions += submissions.length
+          courseCompleted += submissions.filter(s => s.state === 'TURNED_IN').length
+          courseLate += submissions.filter(s => s.late).length
         }
+
+        totalSubmissions += courseSubmissions
+        completedSubmissions += courseCompleted
+        lateSubmissions += courseLate
+
+        coursesWithDetails.push({
+          ...course,
+          studentCount: students.length,
+          assignmentCount: assignments.length,
+          submissionCount: courseSubmissions,
+          completedCount: courseCompleted,
+          lateCount: courseLate,
+          completionRate: courseSubmissions > 0 ? Math.round((courseCompleted / courseSubmissions) * 100) : 0
+        })
       }
 
-      return {
+      const result = {
         totalCourses: courses.length,
         totalStudents,
         totalAssignments,
@@ -261,133 +274,238 @@ export class SimpleClassroomService {
         completedSubmissions,
         lateSubmissions,
         completionRate: totalSubmissions > 0 ? Math.round((completedSubmissions / totalSubmissions) * 100) : 0,
-        courses,
-        weeklyProgress: mockCoordinatorData.weeklyProgress, // Mock para gráficos
-        cellMetrics: mockCoordinatorData.cellMetrics // Mock para células
+        courses: coursesWithDetails,
+        // Datos calculados en tiempo real
+        weeklyProgress: [
+          { week: 'Esta semana', completadas: completedSubmissions, tardias: lateSubmissions }
+        ],
+        cellMetrics: [] // Se calculará cuando implementemos células
       }
+
+      console.log('✅ Datos de coordinador obtenidos:', result)
+      return result
+
     } catch (error) {
-      console.error('Error getting real coordinator data:', error)
-      // Fallback a datos mock si falla la API
-      return mockCoordinatorData
+      console.error('❌ Error obteniendo datos de coordinador:', error)
+      throw error
     }
   }
 
   /**
-   * Vista para PROFESOR: Sus cursos y estudiantes (REAL O MOCK)
+   * Vista para PROFESOR: Sus cursos y estudiantes (SOLO API REAL)
    */
   async getProfessorData(professorEmail: string): Promise<any> {
-    // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 800))
+    console.log(`🔍 Obteniendo datos de profesor para: ${professorEmail}`)
     
-    if (!this.useRealData) {
-      return mockProfessorData
-    }
-
-    // DATOS REALES de Google Classroom API
     try {
       const allCourses = await this.getCourses()
+      console.log(`📚 Revisando ${allCourses.length} cursos para encontrar los del profesor`)
+      
       const professorCourses = []
 
       // Filtrar cursos donde es profesor
       for (const course of allCourses) {
         try {
+          console.log(`🔍 Verificando si ${professorEmail} es profesor en: ${course.name}`)
+          
           const teachersData = await this.fetchFromClassroom(`courses/${course.id}/teachers`)
           const teachers = teachersData.teachers || []
           
-          if (teachers.some((t: any) => t.profile?.emailAddress === professorEmail)) {
+          const isTeacher = teachers.some((t: any) => 
+            t.profile?.emailAddress?.toLowerCase() === professorEmail.toLowerCase()
+          )
+          
+          if (isTeacher) {
+            console.log(`✅ ${professorEmail} ES profesor en: ${course.name}`)
+            
+            // Obtener estudiantes del curso
             const students = await this.getStudentsInCourse(course.id)
+            console.log(`👥 ${students.length} estudiantes en ${course.name}`)
+            
+            // Obtener tareas del curso
             const assignments = await this.getAssignmentsInCourse(course.id)
+            console.log(`📝 ${assignments.length} tareas en ${course.name}`)
+            
+            // Calcular métricas por estudiante
+            const studentsWithMetrics = []
+            for (const student of students) {
+              let completedTasks = 0
+              let totalTasks = assignments.length
+              let averageGrade = 0
+              let gradeCount = 0
+              
+              for (const assignment of assignments) {
+                const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
+                const studentSubmission = submissions.find(s => s.studentId === student.userId)
+                
+                if (studentSubmission && studentSubmission.state === 'TURNED_IN') {
+                  completedTasks++
+                  if (studentSubmission.assignedGrade) {
+                    averageGrade += studentSubmission.assignedGrade
+                    gradeCount++
+                  }
+                }
+              }
+              
+              studentsWithMetrics.push({
+                ...student,
+                completedTasks,
+                totalTasks,
+                completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+                averageGrade: gradeCount > 0 ? (averageGrade / gradeCount).toFixed(1) : 'N/A',
+                lastActivity: new Date().toISOString().split('T')[0] // Placeholder
+              })
+            }
+            
+            // Calcular métricas por tarea
+            const assignmentsWithMetrics = []
+            for (const assignment of assignments) {
+              const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
+              const submittedCount = submissions.filter(s => s.state === 'TURNED_IN').length
+              const pendingCount = students.length - submittedCount
+              const lateCount = submissions.filter(s => s.late).length
+              
+              assignmentsWithMetrics.push({
+                ...assignment,
+                submissions: submittedCount,
+                pending: pendingCount,
+                late: lateCount
+              })
+            }
             
             professorCourses.push({
               ...course,
-              students,
-              assignments,
+              students: studentsWithMetrics,
+              assignments: assignmentsWithMetrics,
               studentCount: students.length,
               assignmentCount: assignments.length,
-              averageCompletion: 75 // Mock calculation
+              averageCompletion: studentsWithMetrics.length > 0 
+                ? Math.round(studentsWithMetrics.reduce((sum, s) => sum + s.completionRate, 0) / studentsWithMetrics.length)
+                : 0
             })
+          } else {
+            console.log(`❌ ${professorEmail} NO es profesor en: ${course.name}`)
           }
         } catch (error) {
+          console.error(`Error verificando curso ${course.name}:`, error)
           continue
         }
       }
 
-      return {
+      const result = {
         courses: professorCourses,
         totalStudents: professorCourses.reduce((sum, course) => sum + course.studentCount, 0),
         totalAssignments: professorCourses.reduce((sum, course) => sum + course.assignmentCount, 0),
-        recentActivity: mockProfessorData.recentActivity // Mock para actividad
+        recentActivity: [] // Se calculará en tiempo real después
       }
+
+      console.log(`✅ Datos de profesor obtenidos: ${professorCourses.length} cursos`, result)
+      return result
+
     } catch (error) {
-      console.error('Error getting real professor data:', error)
-      // Fallback a datos mock si falla la API
-      return mockProfessorData
+      console.error('❌ Error obteniendo datos de profesor:', error)
+      throw error
     }
   }
 
   /**
-   * Vista para ESTUDIANTE: Su progreso personal (REAL O MOCK)
+   * Vista para ESTUDIANTE: Su progreso personal (SOLO API REAL)
    */
   async getStudentData(studentEmail: string): Promise<any> {
-    // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 600))
+    console.log(`🔍 Obteniendo datos de estudiante para: ${studentEmail}`)
     
-    if (!this.useRealData) {
-      return mockStudentData
-    }
-
-    // DATOS REALES de Google Classroom API
     try {
       const courses = await this.getCourses()
+      console.log(`📚 Revisando ${courses.length} cursos para encontrar los del estudiante`)
+      
       const studentCourses = []
       let totalAssignments = 0
       let completedAssignments = 0
       let lateSubmissions = 0
+      let totalGrades = 0
+      let gradeCount = 0
 
       for (const course of courses) {
         const students = await this.getStudentsInCourse(course.id)
-        const studentInCourse = students.find((s: any) => s.profile?.emailAddress === studentEmail)
+        const studentInCourse = students.find((s: any) => 
+          s.profile?.emailAddress?.toLowerCase() === studentEmail.toLowerCase()
+        )
         
         if (studentInCourse) {
+          console.log(`✅ ${studentEmail} está inscrito en: ${course.name}`)
+          
           const assignments = await this.getAssignmentsInCourse(course.id)
           totalAssignments += assignments.length
+          console.log(`📝 ${assignments.length} tareas en ${course.name}`)
 
+          const assignmentsWithStatus = []
           for (const assignment of assignments) {
             const submissions = await this.getSubmissionsForAssignment(course.id, assignment.id)
             const studentSubmission = submissions.find(s => s.studentId === studentInCourse.userId)
             
+            let status = 'assigned'
+            let grade = null
+            let late = false
+            let feedback = null
+            
             if (studentSubmission) {
+              status = studentSubmission.state.toLowerCase()
+              late = studentSubmission.late || false
+              
               if (studentSubmission.state === 'TURNED_IN') {
                 completedAssignments++
+                if (studentSubmission.assignedGrade) {
+                  grade = studentSubmission.assignedGrade
+                  totalGrades += grade
+                  gradeCount++
+                }
               }
+              
               if (studentSubmission.late) {
                 lateSubmissions++
               }
             }
+            
+            assignmentsWithStatus.push({
+              ...assignment,
+              status,
+              grade,
+              late,
+              feedback
+            })
           }
 
           studentCourses.push({
             ...course,
-            assignments
+            assignments: assignmentsWithStatus
           })
         }
       }
 
-      return {
+      const averageGrade = gradeCount > 0 ? parseFloat((totalGrades / gradeCount).toFixed(1)) : 0
+      const completionRate = totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0
+
+      const result = {
         courses: studentCourses,
         totalAssignments,
         completedAssignments,
         lateSubmissions,
-        completionRate: totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0,
-        averageGrade: 8.2, // Mock calculation
-        weeklyProgress: mockStudentData.weeklyProgress, // Mock para gráficos
-        recentSubmissions: mockStudentData.recentSubmissions, // Mock para entregas
-        upcomingDeadlines: mockStudentData.upcomingDeadlines // Mock para fechas
+        completionRate,
+        averageGrade,
+        // Datos calculados en tiempo real
+        weeklyProgress: [
+          { week: 'Esta semana', completadas: completedAssignments, tardias: lateSubmissions }
+        ],
+        recentSubmissions: [], // Se calculará después
+        upcomingDeadlines: [] // Se calculará después
       }
+
+      console.log(`✅ Datos de estudiante obtenidos: ${studentCourses.length} cursos`, result)
+      return result
+
     } catch (error) {
-      console.error('Error getting real student data:', error)
-      // Fallback a datos mock si falla la API
-      return mockStudentData
+      console.error('❌ Error obteniendo datos de estudiante:', error)
+      throw error
     }
   }
 
