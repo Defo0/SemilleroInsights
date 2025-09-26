@@ -292,8 +292,8 @@ TELEGRAM_BOT_TOKEN=tu_token_del_bot
 <div align="center">
 
 [![Website](https://img.shields.io/badge/Website-semilleroinsights.vercel.app-5a25ab?style=for-the-badge)](https://semilleroinsights.vercel.app)
-[![Email](https://img.shields.io/badge/Email-contact@semilleroinsights.com-fabb2f?style=for-the-badge)](mailto:contact@semilleroinsights.com)
-[![Discord](https://img.shields.io/badge/Discord-Semillero%20Community-7289da?style=for-the-badge&logo=discord)](https://discord.gg/semillero)
+[![Email](https://img.shields.io/badge/Email-contact@semilleroinsights.com-fabb2f?style=for-the-badge)](mailto:semilleroinsights@gmail.com)
+[![Discord](https://img.shields.io/badge/Discord-Semillero%20Community-7289da?style=for-the-badge&logo=discord)](https://discord.gg/sQPNuzvaSF)
 [![Telegram](https://img.shields.io/badge/Telegram-@SemilleroInsights-26a5e4?style=for-the-badge&logo=telegram)](https://t.me/SemilleroInsights)
 
 </div>
@@ -313,7 +313,7 @@ Este proyecto está licenciado bajo la **MIT License** - ver el archivo [LICENSE
 **Transformando vidas a través de la tecnología educativa**
 
 [![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge)](https://semillerodigital.org)
-[![Powered by Innovation](https://img.shields.io/badge/Powered%20by-Innovation-5a25ab?style=for-the-badge)](https://github.com/tu-usuario/semillero-insights)
+[![Powered by Innovation](https://img.shields.io/badge/Powered%20by-Innovation-5a25ab?style=for-the-badge)](https://github.com/Defo0/semillero-insights)
 
 ---
 
