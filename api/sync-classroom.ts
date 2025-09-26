@@ -62,6 +62,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  const startTime = Date.now()
+  let syncStats = {
+    courses: 0,
+    students: 0,
+    assignments: 0,
+    submissions: 0
+  }
+
   try {
     const { access_token } = req.body
 
@@ -69,35 +77,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Access token is required' })
     }
 
+    console.log('Starting Google Classroom synchronization...')
+
     // Sincronizar cursos
     const courses = await fetchClassroomCourses(access_token)
+    console.log(`Found ${courses.length} courses`)
     await syncCourses(courses)
+    syncStats.courses = courses.length
 
     // Para cada curso, sincronizar estudiantes y tareas
     for (const course of courses) {
+      console.log(`Syncing course: ${course.name} (${course.id})`)
+      
       const students = await fetchClassroomStudents(access_token, course.id)
+      console.log(`  - Found ${students.length} students`)
       await syncStudents(students, course.id)
+      syncStats.students += students.length
 
       const assignments = await fetchClassroomAssignments(access_token, course.id)
+      console.log(`  - Found ${assignments.length} assignments`)
       await syncAssignments(assignments, course.id)
+      syncStats.assignments += assignments.length
 
       // Para cada tarea, sincronizar entregas
       for (const assignment of assignments) {
         const submissions = await fetchClassroomSubmissions(access_token, course.id, assignment.id)
+        console.log(`    - Assignment "${assignment.title}": ${submissions.length} submissions`)
         await syncSubmissions(submissions, assignment.id)
+        syncStats.submissions += submissions.length
       }
     }
 
+    const duration = Date.now() - startTime
+    console.log(`Synchronization completed in ${duration}ms`)
+
     res.status(200).json({ 
       message: 'Synchronization completed successfully',
-      coursesCount: courses.length
+      duration: `${duration}ms`,
+      stats: syncStats,
+      timestamp: new Date().toISOString()
     })
 
   } catch (error) {
+    const duration = Date.now() - startTime
     console.error('Sync error:', error)
+    
     res.status(500).json({ 
       error: 'Synchronization failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      duration: `${duration}ms`,
+      partialStats: syncStats,
+      timestamp: new Date().toISOString()
     })
   }
 }

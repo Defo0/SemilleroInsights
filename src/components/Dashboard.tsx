@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { ClassroomService } from '../lib/classroom'
+import { dataMode } from '../lib/dataMode'
 import DataModeToggle from './DataModeToggle'
+import SyncStatus from './SyncStatus'
+import CellManager from './CellManager'
 import { 
   Users, 
   BookOpen, 
@@ -52,11 +55,37 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData()
+    
+    // Escuchar cambios en el modo de datos
+    const handleModeChange = () => {
+      loadDashboardData()
+    }
+    
+    // Escuchar actualizaciones de células
+    const handleCellsUpdate = () => {
+      loadDashboardData()
+    }
+    
+    window.addEventListener('datamode-changed', handleModeChange)
+    window.addEventListener('cells-updated', handleCellsUpdate)
+    return () => {
+      window.removeEventListener('datamode-changed', handleModeChange)
+      window.removeEventListener('cells-updated', handleCellsUpdate)
+    }
   }, [])
 
   const loadDashboardData = async () => {
     try {
       setLoading(true)
+      
+      // Si estamos en modo real, primero sincronizar con Classroom
+      if (dataMode.isRealMode()) {
+        try {
+          await classroomService.syncWithClassroom()
+        } catch (syncError) {
+          console.warn('Sync failed, using existing data:', syncError)
+        }
+      }
       
       // Cargar métricas del dashboard
       const dashboardMetrics = await classroomService.getDashboardMetrics()
@@ -114,11 +143,26 @@ export default function Dashboard() {
       {/* Data Mode Toggle */}
       <DataModeToggle />
       
+      {/* Sync Status */}
+      <SyncStatus />
+      
+      {/* Cell Manager */}
+      <CellManager />
+      
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard General</h1>
-          <p className="text-gray-600">Resumen del progreso académico de Semillero Digital</p>
+          <p className="text-gray-600">
+            Resumen del progreso académico de Semillero Digital
+            <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+              dataMode.isMockMode() 
+                ? 'bg-orange-100 text-orange-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {dataMode.isMockMode() ? 'Modo Demo' : 'Datos Reales'}
+            </span>
+          </p>
         </div>
         <button
           onClick={loadDashboardData}
@@ -126,7 +170,7 @@ export default function Dashboard() {
           className="btn-primary flex items-center gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Sincronizando...' : 'Sincronizar'}
+          {loading ? 'Sincronizando...' : dataMode.isMockMode() ? 'Actualizar' : 'Sincronizar con Classroom'}
         </button>
       </div>
 

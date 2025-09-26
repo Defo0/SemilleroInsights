@@ -211,3 +211,31 @@ BEGIN
   ORDER BY priority, created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Función para obtener estadísticas de distribución de células
+CREATE OR REPLACE FUNCTION get_cell_distribution_stats()
+RETURNS TABLE (
+  cell_id UUID,
+  cell_name TEXT,
+  cell_color TEXT,
+  student_count BIGINT,
+  professor_name TEXT,
+  professor_email TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    c.id as cell_id,
+    c.name as cell_name,
+    c.color as cell_color,
+    COUNT(sc.student_id) as student_count,
+    p.name as professor_name,
+    p.email as professor_email
+  FROM public.cells c
+  LEFT JOIN public.student_cells sc ON c.id = sc.cell_id
+  LEFT JOIN public.professor_cells pc ON c.id = pc.cell_id
+  LEFT JOIN public.professors p ON pc.professor_id = p.id
+  GROUP BY c.id, c.name, c.color, p.name, p.email
+  ORDER BY c.name;
+END;
+$$ LANGUAGE plpgsql;
