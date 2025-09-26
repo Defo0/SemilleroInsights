@@ -12,15 +12,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_SUPABASE_URL": "@supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
-    "VITE_GOOGLE_CLIENT_ID": "@google-client-id",
-    "RESEND_API_KEY": "@resend-api-key",
-    "DISCORD_WEBHOOK_URL": "@discord-webhook-url",
-    "TELEGRAM_BOT_TOKEN": "@telegram-bot-token",
-    "VITE_APP_URL": "@app-url"
-  }
+  ]
 }
