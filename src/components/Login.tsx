@@ -97,6 +97,19 @@ export default function Login() {
           </div>
         </div>
 
+        {/* Demo Link */}
+        <div className="text-center mt-6">
+          <a 
+            href="/demo" 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+          >
+            🎭 Ver Demo Sin Login
+          </a>
+          <p className="text-xs text-gray-500 mt-2">
+            Explora las funcionalidades sin necesidad de cuenta
+          </p>
+        </div>
+
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">

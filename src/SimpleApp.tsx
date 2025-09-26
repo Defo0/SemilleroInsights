@@ -11,6 +11,7 @@ function SimpleApp() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any>(null)
   const [demoRole, setDemoRole] = useState<SimpleUserRole | null>(null) // Para selector de demo
+  const [useRealData, setUseRealData] = useState(false) // Toggle para datos reales vs mock
 
   const classroomService = SimpleClassroomService.getInstance()
 
@@ -86,6 +87,9 @@ function SimpleApp() {
 
   const loadDataForRole = async (role: SimpleUserRole, email: string) => {
     try {
+      // Configurar el servicio para usar datos reales o mock
+      classroomService.setUseRealData(useRealData)
+      
       let roleData
 
       switch (role) {
@@ -123,6 +127,16 @@ function SimpleApp() {
       setDemoRole(newRole)
       setLoading(true)
       await loadDataForRole(newRole, user.email)
+      setLoading(false)
+    }
+  }
+
+  const handleDataModeToggle = async () => {
+    if (user) {
+      setUseRealData(!useRealData)
+      setLoading(true)
+      const currentRole = demoRole || user.role
+      await loadDataForRole(currentRole, user.email)
       setLoading(false)
     }
   }
@@ -183,18 +197,37 @@ function SimpleApp() {
                   {(demoRole || user.role) === 'student' && '🎓 Mi Progreso'}
                 </p>
                 
-                {/* Selector de Vista Demo */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Vista Demo:</span>
-                  <select 
-                    value={demoRole || user.role}
-                    onChange={(e) => handleRoleChange(e.target.value as SimpleUserRole)}
-                    className="text-xs border border-gray-300 rounded px-2 py-1 bg-white"
-                  >
-                    <option value="coordinator">📊 Coordinador</option>
-                    <option value="professor">👨‍🏫 Profesor</option>
-                    <option value="student">🎓 Estudiante</option>
-                  </select>
+                {/* Controles Demo */}
+                <div className="flex items-center gap-4">
+                  {/* Toggle Datos Reales/Mock */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">Datos:</span>
+                    <button
+                      onClick={handleDataModeToggle}
+                      disabled={loading}
+                      className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${
+                        useRealData 
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                          : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {loading ? '⏳' : useRealData ? '🔗 API Real' : '🎭 Mock'}
+                    </button>
+                  </div>
+                  
+                  {/* Selector de Vista Demo */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">Vista:</span>
+                    <select 
+                      value={demoRole || user.role}
+                      onChange={(e) => handleRoleChange(e.target.value as SimpleUserRole)}
+                      className="text-xs border border-gray-300 rounded px-2 py-1 bg-white"
+                    >
+                      <option value="coordinator">📊 Coordinador</option>
+                      <option value="professor">👨‍🏫 Profesor</option>
+                      <option value="student">🎓 Estudiante</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
