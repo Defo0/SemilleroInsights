@@ -33,6 +33,13 @@ export default function DataModeToggle() {
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img 
+              src="/thumbnail_sin_fondo.png" 
+              alt="Semillero Digital Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
           {currentMode === 'mock' ? (
             <TestTube className="w-5 h-5 text-accent-orange" />
           ) : (

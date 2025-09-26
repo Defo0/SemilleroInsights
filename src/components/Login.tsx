@@ -37,8 +37,12 @@ export default function Login() {
       <div className="max-w-md w-full">
         {/* Logo y Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <BarChart3 className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-4">
+            <img 
+              src="/thumbnail_sin_fondo.png" 
+              alt="Semillero Digital Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Semillero Insights

@@ -59,8 +59,12 @@ export default function Layout({ children, session, user }: LayoutProps) {
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img 
+                  src="/thumbnail_sin_fondo.png" 
+                  alt="Semillero Digital Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-semibold text-gray-900">Semillero Insights</span>
             </div>
@@ -95,8 +99,12 @@ export default function Layout({ children, session, user }: LayoutProps) {
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200">
           <div className="flex h-16 shrink-0 items-center px-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img 
+                  src="/thumbnail_sin_fondo.png" 
+                  alt="Semillero Digital Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-semibold text-gray-900">Semillero Insights</span>
             </div>
