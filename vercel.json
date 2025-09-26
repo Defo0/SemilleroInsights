@@ -4,7 +4,7 @@
   "framework": "vite",
   "functions": {
     "api/*.cjs": {
-      "runtime": "@vercel/node@3.0.0"
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
