@@ -245,7 +245,7 @@ TELEGRAM_BOT_TOKEN=tu_token_del_bot
 
 **Semillero Insights** no es solo una herramienta tecnológica, es un **catalizador de cambio social**:
 
-- **🎓 144 Jóvenes Impactados**: Estudiantes en situación de vulnerabilidad
+- **🎓 144 Jóvenes Impactados**: Estudiantes 
 - **👥 8 Células de Aprendizaje**: Grupos pequeños para atención personalizada
 - **📈 78% Tasa de Completitud**: Mejora significativa en retención
 - **🌟 Transformación Digital**: Modernización de procesos educativos
@@ -289,7 +289,7 @@ TELEGRAM_BOT_TOKEN=tu_token_del_bot
 
 ## 🏆 **Reconocimientos**
 
-- 🥇 **Mejor Solución EdTech** - Hackathon 2024
+- 🥇 **Mejor Solución EdTech** - Hackathon 2025 
 - 🌟 **Impacto Social** - Premio Innovación Social
 - 🚀 **Mejor Arquitectura Técnica** - Tech Excellence Award
 - 💡 **Solución Más Innovadora** - Digital Transformation Prize
