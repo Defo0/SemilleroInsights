@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./LOGO-SEMILLERO.png" alt="Semillero Digital" width="200"/>
+  <img src="./public/thumbnail_sin_fondo.png" alt="Semillero Digital" width="200"/>
   
   # 📊 Semillero Insights
   
